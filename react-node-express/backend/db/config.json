@@ -1,0 +1,23 @@
+{
+  "mongodb": {
+    "connectionURI": "mongodb://db1:27017,db2:27027",
+    "options": {
+      "authSource": "admin",
+      "auth": {
+        "user": "username",
+        "password": "password"
+      },
+      "replicaSet": "rsTest",
+      "readPreference": "nearest",
+      "useNewUrlParser": true,
+      "useUnifiedTopology": true
+    }
+  },
+  "mongodb-dev": {
+    "connectionURI": "mongodb://localhost:27017",
+    "options": {
+      "useNewUrlParser": true,
+      "useUnifiedTopology": true
+    }
+  }
+}

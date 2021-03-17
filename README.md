@@ -12,11 +12,18 @@ react-node-express目录涉及技术主要分为以下几个方面：
 5. 工程化、模块化: es6, babel, webpack, react-create-app
 
 那么，这一切是怎么变成如今这么乱七八糟的模样的呢...
+
 我想尝试下神往已久的graphql。于是我注释掉了router，新建了schema，引入了graphql。
+
 redux怎么比vuex还啰嗦。简直就是又臭又长又各种打结的裹脚布啊！
+
 @apollo/client 还有状态管理功能？果然尝试！啊，好像不太好使诶...
+
 试试dva，看上去和vuex差不多。
-于是，react-node
+
+这就是umi-test目录的由来啦。
+
+话说umi-request看上去不错诶..
 
 ------------------------------------------------------------------------------
 

@@ -10,7 +10,7 @@ const Qs = require('qs')
  */
 type argsType = {
   name: string
-  params?: Object,
+  params?: Object
   errHandler?: ErrHandler
 }
 type param = {
@@ -20,7 +20,7 @@ type param = {
 
 const http = (args: argsType) => {
   const {name, params, errHandler} = args
-  const {uri, method, arrayFormat='indices'} = URIS[name]
+  const {uri, method, requestType='json', arrayFormat='indices'} = URIS[name]
   const paramType: param = {
     get: {
       params,
@@ -29,6 +29,7 @@ const http = (args: argsType) => {
 			}
     },
     post: {
+      requestType, 
       data: params
     }
   }
@@ -41,14 +42,13 @@ const http = (args: argsType) => {
     'Accept': 'application/json',
   }
 
-  extendRequest.interceptors.request.use((url, options) => {
+  extendRequest.interceptors.request.use((url, options) => {//注释掉拦截器，似乎把并发的同一个接口请求拦截了，只发出去一个请求。
     return {
-      url: `${baseUrl}${url}`,
-      options: { ...options, headers},
+      options: {...options, headers},
     };
   });
 
-  return extendRequest(uri, {method, params: {...paramType[method]}})
+  return extendRequest(uri, {method, ...paramType[method]})
 };
 
 export default http;

@@ -11,6 +11,7 @@ export default defineConfig({
   request: {
     dataField: 'data',
   },
+  workerLoader: {}
   // proxy: {
   //   '/api': {
   //     'target': 'http://jsonplaceholder.typicode.com/',

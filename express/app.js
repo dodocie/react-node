@@ -1,6 +1,5 @@
 const createError = require('http-errors');
 const express = require('express');
-const bodyParser    = require('body-parser')
 const {v4: uuidv4}  = require('uuid')
 const session       = require('express-session')
 const path = require('path');
@@ -22,7 +21,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors())
-app.use(bodyParser.json())
 app.use((req, res, next)=>{
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8000')
   res.setHeader(

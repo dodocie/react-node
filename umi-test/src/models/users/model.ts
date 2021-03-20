@@ -1,5 +1,5 @@
-import { Effect, ImmerReducer, Reducer, Subscription } from 'umi';
-import {getRemoteList} from './service'
+import { Effect, Reducer, Subscription } from 'umi';
+import {getRemoteList, upload, verifyFile} from '../service'
 import {UserState} from '../../utils/interface'
 
 type routeEnterEvent = {
@@ -11,6 +11,7 @@ export interface UserModelType {
   state: UserState;
   effects: {
     queryList: Effect;
+    uploadFile: Effect;
   };
   reducers: {
     getList: Reducer<UserState>;
@@ -37,28 +38,47 @@ const UserModel:  UserModelType = {
         }
       })
     },
+    *uploadFile({payload}, {call, input}){
+      console.log('payload', payload)
+      const data = yield call(upload, payload.formData)
+    },
+    *verifyUpload({payload}, {call, input}){
+      console.log('payload', payload)
+      const result = yield call(verifyFile, payload.dataStr)
+      yield put({
+        type: '',
+        payload: {
+          fileExistResult: result
+        }
+      })
+    }
   },
   reducers: {
     getList(state, action) {
-      // return {
-      //   ...state,
-      //   ...action.payload,
-      // };
-      const {type, payload} = action
-      return payload
+      return {
+        ...state,
+        ...action.payload,
+      }
     },
     // 启用 immer 之后
     // save(state, action) {
     //   state.name = action.payload;
     // },
+    getFileExist(state, action){
+      return {
+        ...state,
+        ...action.payload
+      }
+    }
   },
   subscriptions: {
     setup({ dispatch, history }) {
+      const do_nothing = ()=>({})
       const props: routeEnterEvent = {
-        '/users': ()=>dispatch({type: 'queryList'})
+        '/users': ()=>dispatch({type: 'queryList'}),
       }
       return history.listen(({ pathname }) => {
-        props[pathname]()
+        (props[pathname]||do_nothing)()
       });
     }
   }

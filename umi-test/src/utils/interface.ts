@@ -25,6 +25,12 @@ export type Record = {
   age?: number
 }
 
+type fileResult = {
+  shouldUpload: boolean
+  uploadList?: []
+}
+
 export interface UserState {
   dataSource: Record[]
+  fileExistResult: fileResult
 }

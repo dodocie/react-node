@@ -27,7 +27,13 @@ const codeMessage: message = {
  * 异常处理程序
  */
 export const errorHandler = (error: Err) => {
-  const { response } = error;
+  const { response, data, name } = error;
+  if (name === 'AbortError') {
+    return {
+      code: 0, // 请求成功
+      aborted: true, // callback页面是否中止请求成功
+    };
+  }
   const errortext = codeMessage[response.status] || response.statusText;
   const { status, url } = response;
 

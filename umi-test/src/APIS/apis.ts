@@ -12,7 +12,7 @@ type uriType = {
 export const URIS: uriType = {
   getNameList: {uri: '/namelist', method: 'get'},
   uploadFile: {uri: '/upload', method: 'post', requestType: 'form'},
-  verifyFile: {uri: '/verifyFile', method: 'post'}
+  verifyFile: {uri: '/file', method: 'post'}
 }
 
 export const baseUrl = 'http://localhost:3000'

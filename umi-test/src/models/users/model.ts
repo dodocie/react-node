@@ -12,9 +12,11 @@ export interface UserModelType {
   effects: {
     queryList: Effect;
     uploadFile: Effect;
+    verifyUpload: Effect
   };
   reducers: {
     getList: Reducer<UserState>;
+    getFileExist: Reducer<UserState>;
     // 启用 immer 之后
     // save: ImmerReducer<IndexModelState>;
   };
@@ -26,6 +28,9 @@ const UserModel:  UserModelType = {
 
   state: {
     dataSource: [],
+    fileExistResult: {
+      shouldUpload: true
+    }
   },
 
   effects: {
@@ -38,17 +43,15 @@ const UserModel:  UserModelType = {
         }
       })
     },
-    *uploadFile({payload}, {call, input}){
-      console.log('payload', payload)
+    *uploadFile({payload}, {call, put}){
       const data = yield call(upload, payload.formData)
     },
-    *verifyUpload({payload}, {call, input}){
-      console.log('payload', payload)
-      const result = yield call(verifyFile, payload.dataStr)
+    *verifyUpload({payload}, {call, put}){
+      const fileExistResult = yield call(verifyFile, payload.dataStr)
       yield put({
-        type: '',
+        type: 'getFileExist',
         payload: {
-          fileExistResult: result
+          fileExistResult
         }
       })
     }

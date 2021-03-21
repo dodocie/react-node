@@ -4,6 +4,8 @@ import {ErrHandler} from '../utils/interface'
 import {URIS, baseUrl} from './apis'
 
 const Qs = require('qs')
+// const controller = new AbortController()
+// const { signal } = controller
 
 /**
  * 配置request请求时的默认参数
@@ -44,7 +46,7 @@ const http = (args: argsType) => {
 
   extendRequest.interceptors.request.use((url, options) => {//注释掉拦截器，似乎把并发的同一个接口请求拦截了，只发出去一个请求。
     return {
-      options: {...options, headers},
+      options: {...options, headers, signal: options.signal},
     };
   });
 

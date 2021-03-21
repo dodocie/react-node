@@ -34,4 +34,4 @@ const mergeFileChunk = async (filePath, fileName, size) => {//filePath 为要写
   fse.rmdirSync(chunkpath)//合并成功后，删除二进制流文件
 }
 
-// exports.mergeFileChunk = mergeFileChunk
+exports.mergeFileChunk = mergeFileChunk

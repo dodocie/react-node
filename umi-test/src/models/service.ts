@@ -9,13 +9,14 @@ export async function getRemoteList () {
   return res.data.dataSource
 }
 
-export async function upload(params: any) {
+export async function upload(params: object) {
+  console.log('params', params)
   const [err, res] = await to(fetch({name: 'uploadFile', params}))
   //...errHandler
 }
 
-export async function verifyFile(dataStr: string) {
-  const [err, res] = await to(fetch({name: 'verifyFile', dataStr}))
+export async function verifyFile(params: object) {
+  const [err, res] = await to(fetch({name: 'verifyFile', params}))
   //...errHandler
   return res.data.result
 }

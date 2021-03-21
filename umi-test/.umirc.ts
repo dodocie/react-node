@@ -12,11 +12,4 @@ export default defineConfig({
     dataField: 'data',
   },
   workerLoader: {}
-  // proxy: {
-  //   '/api': {
-  //     'target': 'http://jsonplaceholder.typicode.com/',
-  //     'changeOrigin': true,
-  //     'pathRewrite': { '^/api' : '' },
-  //   },
-  // },
 });

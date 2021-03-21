@@ -8,6 +8,8 @@ interface Body {
 
 export interface Err {
   response: Body
+  data: object
+  name: string
 }
 export interface ErrHandler {
   (error: Err): void

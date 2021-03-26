@@ -10,7 +10,7 @@ umi-test目录：umi + antd
 1. 大文件上传断点续传
 
 待实现
-1. 待实现：中断和恢复上传，需要用react高阶组件封一个abort组件
+1. 中止后，恢复上传
 2. 真实的上传进度条
 
 express: express

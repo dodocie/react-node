@@ -12,6 +12,11 @@
 
 # misc
 .DS_Store
+.history
+
+# Editor directories and files
+.idea
+.vscode
 
 # umi
 /src/.umi

@@ -1,5 +1,5 @@
 import { Effect, Reducer, Subscription } from 'umi';
-import {getRemoteList, upload, verifyFile} from '../service'
+import {getRemoteList} from '../service'
 import {UserState} from '../../utils/interface'
 
 type routeEnterEvent = {
@@ -11,12 +11,9 @@ export interface UserModelType {
   state: UserState;
   effects: {
     queryList: Effect;
-    uploadFile: Effect;
-    verifyUpload: Effect
   };
   reducers: {
     getList: Reducer<UserState>;
-    getFileExist: Reducer<UserState>;
     // 启用 immer 之后
     // save: ImmerReducer<IndexModelState>;
   };
@@ -27,10 +24,7 @@ const UserModel:  UserModelType = {
   namespace: 'users',
 
   state: {
-    dataSource: [],
-    fileExistResult: {
-      shouldUpload: true
-    }
+    dataSource: []
   },
 
   effects: {
@@ -40,18 +34,6 @@ const UserModel:  UserModelType = {
         type: 'getList',
         payload: {
           dataSource
-        }
-      })
-    },
-    *uploadFile({payload}, {call, put}){
-      const data = yield call(upload, payload.formData)
-    },
-    *verifyUpload({payload}, {call, put}){
-      const fileExistResult = yield call(verifyFile, payload.dataStr)
-      yield put({
-        type: 'getFileExist',
-        payload: {
-          fileExistResult
         }
       })
     }
@@ -67,12 +49,6 @@ const UserModel:  UserModelType = {
     // save(state, action) {
     //   state.name = action.payload;
     // },
-    getFileExist(state, action){
-      return {
-        ...state,
-        ...action.payload
-      }
-    }
   },
   subscriptions: {
     setup({ dispatch, history }) {

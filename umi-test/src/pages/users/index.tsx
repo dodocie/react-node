@@ -1,4 +1,4 @@
-import React, {useState, FC} from 'react'
+import {useState, FC} from 'react'
 import {connect, Dispatch, Loading} from 'umi'
 import {Table, Tag} from 'antd'
 import UserModel from './components/UserModel' 

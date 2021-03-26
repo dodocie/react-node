@@ -37,10 +37,7 @@ module.exports = class {
       const [fileHash] = fields.fileHash
       const [hash] = fields.hash
       const chunkDir = path.resolve(UPLOAD_DIR, fileHash)
-      const filePath = path.resolve(UPLOAD_DIR, `${fileHash}${extractExt(filename)}`)
-
-      console.log('chunkDir', chunkDir)
-      console.log('filePath', filePath)
+      const filePath = path.resolve(chunkDir, `${hash}`)
 
       if(fse.existsSync(filePath)){
         res.send({code: 1, message: 'file exit'})

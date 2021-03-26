@@ -9,10 +9,10 @@ export async function getRemoteList () {
   return res.data.dataSource
 }
 
-export async function upload(params: object) {
-  console.log('params', params)
-  const [err, res] = await to(fetch({name: 'uploadFile', params}))
+export async function upload(params: object, signal: AbortSignal) {
+  const [err, res] = await to(fetch({name: 'uploadFile', params, signal}))
   //...errHandler
+  return res
 }
 
 export async function verifyFile(params: object) {

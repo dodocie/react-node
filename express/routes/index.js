@@ -36,6 +36,7 @@ router.get('/namelist', function(req, res, next) {
 });
 
 router.post('/upload', async (req, res, next)=>{
+  console.log('aborted..', req.aborted)
   await controller.handleFormData(req, res)
 })
 

@@ -7,3 +7,12 @@
   width: 50%;
   margin: auto;
 } 
+.file-input{
+  width: 50%;
+}
+.flex{
+  display: flex;
+}
+.flex-around{
+  justify-content: space-around;
+}

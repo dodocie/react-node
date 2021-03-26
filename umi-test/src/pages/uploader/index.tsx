@@ -1,12 +1,14 @@
 import React, {useState, FC, useEffect, useRef, ChangeEvent, MouseEvent} from 'react'
 import { Progress } from 'antd';
-import {connect, Dispatch} from 'umi'
-import {UserState, Record} from '../../utils/interface'
+import {connect, ControllerState, Dispatch} from 'umi'
+import {UploaderState} from '../../models/uploader/model'
 import {to} from '../../utils/share'
 import {workerUrl} from '../../utils/hash'
+import Abort from '../../components/abort'
 
 interface Uploader {
-  users: UserState
+  uploader: UploaderState
+  controller: ControllerState
   dispatch: Dispatch
 }
 
@@ -20,10 +22,10 @@ type FormData = {
 }
 
 type FileChunk = {
-  file
+  file: Blob
 }
 
-const fragmentSize = 1024*1024*.1
+const fragmentSize = 1024*1024
 
 const Status = {
   wait: 'wait',
@@ -31,24 +33,26 @@ const Status = {
   uploading: 'uploading'
 }
 
-const Uploader: FC<Uploader> = ({users, dispatch})=>{
-  const {fileExistResult} = users
+const Uploader: FC<Uploader> = ({uploader, controller, dispatch})=>{
+  const {fileExistResult} = uploader
+  const {controllers} = controller
 
   const [file, setFile] = useState(null)
   const [worker, setWorker] = useState<Worker>()
   const [fileHash, setHash] = useState('')
   const [hashPercentage, setHashPercentage] = useState(0)
   const [status, setStatus] = useState(Status['wait'])
-  const [requestList, setFetches] = useState<Promise<{}>[]>([])
+  const [fetchType, setFetchType] = useState('')
+  const [signalList, setFetches] = useState<AbortSignal[]>([])
   const [formData, setFormData] = useState<FormData[]>([])
 
   const preview = useRef(null)
 
   useEffect(() => {
     // console.log('useEffect', formData)
-  }, [status, file, worker, hashPercentage, fileHash, formData, requestList])
+  }, [status, file, worker, hashPercentage, fileHash, formData, signalList, fetchType])
 
-  const createFileChunk = (file: Blob, size=fragmentSize): Array<Object>=>{
+  const createFileChunk = (file: Blob, size=fragmentSize): Array<FileChunk>=>{
     const fileChunkList = []
     let cur = 0
     while(cur<file.size){
@@ -92,11 +96,13 @@ const Uploader: FC<Uploader> = ({users, dispatch})=>{
 
   const verifyUpload = async (fileHash: string) => {
     const filename = file?.name
-    dispatch({type: 'users/verifyUpload', payload: {dataStr: {filename, fileHash}}})
+    dispatch({type: 'uploader/verifyUpload', payload: {dataStr: {filename, fileHash}}})
   }
 
   const uploadChunks = async (formData: FormData[], list: []=[])=>{
     const do_something = ()=>({}) //umi-request 采用 fetch，不支持 xhr的onprogress事件。
+    const requestName = 'upload'
+
     const requestList = formData
       .map(({chunk, hash, index, fileHash})=>{
         const formData = new FormData()
@@ -104,18 +110,23 @@ const Uploader: FC<Uploader> = ({users, dispatch})=>{
         formData.append('hash', hash)//切片hash
         formData.append('filename', file?.name)
         formData.append('fileHash', fileHash)
-        return {formData, index}
+        const controller = new AbortController()
+        return {formData, index, controller}
       })
-      .map(async({formData})=>dispatch({type: 'users/uploadFile', payload: {formData, onprogress: do_something}}))
-      
-    setFetches(requestList)
-    await Promise.all(requestList)
+
+    setFetchType(requestName) 
+
+    requestList.forEach(({formData, controller})=>{
+      dispatch({type: 'uploader/uploadFile', payload: {formData, controller, fetchType: requestName, onprogress: do_something}})
+    })
+    const signalList: AbortSignal[] = requestList.map(item=>item.controller.signal)
+    setFetches(signalList)
   }
 
   const handleUpload = async (event: MouseEvent) => {
-    if(!file) return
+    if(file === null) return
     setStatus(Status.uploading)
-    const fileChunckList: Object[] = createFileChunk(file)
+    const fileChunckList: FileChunk[] = createFileChunk(file)
     const [, hash] = await to(calHash(fileChunckList))
     setHash(hash)
     await verifyUpload(hash)//验证，上传
@@ -139,15 +150,12 @@ const Uploader: FC<Uploader> = ({users, dispatch})=>{
     await uploadChunks(formData, uploadList)
   }
 
-  const resetData = () => {//暂停请求
-    // requestList.forEach(()=>dispatch({type: 'user/abort'}))
+  const handlePause = () => {
+    console.log('pause...')
+    setStatus(Status.pause)
     if(worker){//停止hash计算
       worker.onmessage = null
     }
-  }
-  const handlePause = () => {
-    setStatus(Status.pause)
-    resetData()
   }
 
   const handleResumit = async () => {
@@ -157,58 +165,26 @@ const Uploader: FC<Uploader> = ({users, dispatch})=>{
     await uploadChunks(formData, uploadList)
   }
 
+  const styles = ['aaa-1']
+
   return (
     <div>
-      <input type="file" name="upload" id="upload" onChange={handleFileChange}/>
-      <button onClick={e=>handleUpload(e)}>upload</button>
-      <button onClick={handlePause}>pause</button>
-      <button onClick={handleResumit}>continue</button>
+      <div className="flex flex-around">
+        <input type="file" name="upload" id="upload" className="file-input" onChange={handleFileChange}/>
+        <button onClick={e=>handleUpload(e)}>upload</button>
+        <Abort styles={styles} signalList={signalList} fetchType={fetchType} handler={handlePause}/>
+        <button onClick={handleResumit}>continue</button>
+      </div>
       <img ref={preview} src="" className='pre-view' id="preview" alt=""/>
       <Progress percent={hashPercentage} />
     </div>
   )
 }
 
-// async function upload(event: MouseEvent){
-//   const [file] = event.target?.files
-//     const file_name = file.name.split('.')[0]
-
-//     const fileChunkList = []
-//     let cur = 0
-//     while(cur<file.size){
-//       fileChunkList.push({ 
-//         file: file.slice(cur, cur+fragmentSize)
-//       })
-//       cur += fragmentSize
-//     }
-
-//     const requestList = fileChunkList
-//       .map((blob, index)=>{
-//         const {file} = blob
-//         const formData = new FormData()
-//         formData.append('chunk', file)
-//         formData.append('filename', `${file_name}-${index}`)
-//         return {formData}
-//       })
-//       .map(async({formData})=>{
-//         dispatch({type: 'users/uploadFile', payload: {formData}})
-//       })
-
-//     await Promise.all(requestList)
-
-//     const pic: HTMLElement | null = document.getElementById('preview')
-
-//     const URL = window.URL
-//     const fileUrl = URL.createObjectURL(file)
-//     if(pic){
-//       pic.src = fileUrl
-//       pic.onload = ()=> URL.revokeObjectURL(fileUrl)//释放文件对象
-//     }
-// }
-
-const mapState2Props = ({users}: {users: UserState}) => {//users: model.ts namespace:users 
+const mapState2Props = ({uploader, controller}: {uploader: UploaderState, controller: ControllerState}) => {
   return {
-    users
+    uploader,
+    controller
   }
 }
 

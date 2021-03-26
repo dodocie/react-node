@@ -10,18 +10,18 @@ const Qs = require('qs')
 /**
  * 配置request请求时的默认参数
  */
-type argsType = {
+export type argsType = {
   name: string
   params?: Object
   errHandler?: ErrHandler
+  signal?: AbortSignal
 }
 type param = {
   [k: string]: Object
 }
 
-
 const http = (args: argsType) => {
-  const {name, params, errHandler} = args
+  const {name, params, errHandler, signal} = args
   const {uri, method, requestType='json', arrayFormat='indices'} = URIS[name]
   const paramType: param = {
     get: {
@@ -35,20 +35,21 @@ const http = (args: argsType) => {
       data: params
     }
   }
-  const extendRequest = extend({
-    errorHandler: errHandler || errorHandler,
-    ...options
-  })
 
   const headers = {
     'Accept': 'application/json',
   }
+  const extendRequest = extend({
+    errorHandler: errHandler || errorHandler,
+    ...options, headers, signal
+  })
 
-  extendRequest.interceptors.request.use((url, options) => {//注释掉拦截器，似乎把并发的同一个接口请求拦截了，只发出去一个请求。
-    return {
-      options: {...options, headers, signal: options.signal},
-    };
-  });
+  // extendRequest.interceptors.request.use((url, options) => {//allInterceptors.reduce(reducer, Promise.resolve())  reducer: return p1.then =>return p2
+  //   return {
+  //     url: `${baseUrl}${url}`,
+  //     options: {...options, headers, signal},
+  //   };
+  // }, { global: false });//全局拦截器关闭
 
   return extendRequest(uri, {method, ...paramType[method]})
 };
